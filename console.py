@@ -168,10 +168,15 @@ class HBNBCommand(cmd.Cmd):
                 key, value = arg.split('=')
                 if value.startswith('"'):
                     value = value.strip('"').replace('_', ' ')
-
-                else:
+                elif '.' in value:
                     try:
-                        value = eval(value)
+                        value = float(value)
+                    except (SyntaxError, NameError):
+                        continue
+                else:
+
+                    try:
+                        value = int(value)
                     except (SyntaxError, NameError):
 
                         continue  # Handle other types of values if needed
@@ -184,7 +189,7 @@ class HBNBCommand(cmd.Cmd):
             storage.save()
         except ValueError:
             print(ValueError)
-            return
+            re
 
     def help_show(self):
         """ Help information for the show command """
