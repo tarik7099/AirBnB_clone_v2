@@ -8,21 +8,33 @@ from console import HBNBCommand
 from models.engine.file_storage import FileStorage
 
 
-class TestCreateCommand(unittest.TestCase):
-    """Unittests for testing the create command in HBNB command interpreter."""
+class TestHBNBCommand(unittest.TestCase):
+    """Unittests for testing the HBNB command interpreter."""
 
     @classmethod
     def setUpClass(cls):
-        """Test setup."""
+        """HBNBCommand testing setup.
+
+        Temporarily rename any existing file.json.
+        Reset FileStorage objects dictionary.
+        Create an instance of the command interpreter.
+        """
         try:
             os.rename("file.json", "tmp")
         except IOError:
             pass
+        # Create an instance of the HBNBCommand class. This allows the test
+        # methods within the class to access and use this instance during the
+        # testing process.
         cls.HBNB = HBNBCommand()
 
     @classmethod
     def tearDownClass(cls):
-        """Test teardown."""
+        """HBNBCommand testing teardown.
+
+        Restore original file.json.
+        Delete the test HBNBCommand instance.
+        """
         try:
             os.rename("tmp", "file.json")
         except IOError:
@@ -30,18 +42,18 @@ class TestCreateCommand(unittest.TestCase):
         del cls.HBNB
 
     def setUp(self):
-        """Test setup."""
+        """Reset FileStorage objects dictionary."""
         FileStorage._FileStorage__objects = {}
 
     def tearDown(self):
-        """Test teardown."""
+        """Delete any created file.json."""
         try:
             os.remove("file.json")
         except IOError:
             pass
 
-    def test_errors(self):
-        """Test error handling in create command."""
+    def test_create_for_errors(self):
+        """Test create command errors."""
         # Test if class name is missing
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("create")
@@ -55,45 +67,78 @@ class TestCreateCommand(unittest.TestCase):
 
     def test_create_command_validity(self):
         """Test create command."""
-        # Create instances and capture their IDs
+        # Create BaseModel instance and capture its ID
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("create BaseModel")
-            bm_id = f.getvalue().strip()
+            bm = f.getvalue().strip()
 
+        # Create User instance and capture its ID
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("create User")
-            us_id = f.getvalue().strip()
+            us = f.getvalue().strip()
 
+        # Create State instance and capture its ID
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("create State")
-            st_id = f.getvalue().strip()
+            st = f.getvalue().strip()
 
+        # Create Place instance and capture its ID
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create Place")
+            pl = f.getvalue().strip()
+
+        # Create City instance and capture its ID
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create City")
+            ct = f.getvalue().strip()
+
+        # Create Review instance and capture its ID
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create Review")
+            rv = f.getvalue().strip()
+
+        # Create Amenity instance and capture its ID
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create Amenity")
+            am = f.getvalue().strip()
         # Test if the created instances are in the output of "all" command
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("all BaseModel")
-            self.assertIn(bm_id, f.getvalue())
+            self.assertIn(bm, f.getvalue())
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("all User")
-            self.assertIn(us_id, f.getvalue())
+            self.assertIn(us, f.getvalue())
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("all State")
-            self.assertIn(st_id, f.getvalue())
+            self.assertIn(st, f.getvalue())
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("all Place")
+            self.assertIn(pl, f.getvalue())
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("all City")
+            self.assertIn(ct, f.getvalue())
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("all Review")
+            self.assertIn(rv, f.getvalue())
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("all Amenity")
+            self.assertIn(am, f.getvalue())
 
     def test_create_command_with_kwargs(self):
-        """Test create command with additional kwargs."""
+        """Test create command with kwargs."""
         # Test create command with additional key-value pairs
         with patch("sys.stdout", new=StringIO()) as f:
-            call = "create Place city_id='0001' name='My_house' number_rooms=4 latitude=37.77 longitude=43.434"
+            call = (f'create Place city_id="0001" name="My_house" number_rooms=4 latitude=37.77 longitude=43.434')  # noqa
             self.HBNB.onecmd(call)
-            pl_id = f.getvalue().strip()
-
-        # Test if the created instance and kwargs are in the output of "all" command
+            pl = f.getvalue().strip()
+         # Test if the created instance and kwargs are in the
+         #    output of "all" command
         with patch("sys.stdout", new=StringIO()) as f:
             self.HBNB.onecmd("all Place")
             output = f.getvalue()
-            self.assertIn(pl_id, output)
+            self.assertIn(pl, output)
             self.assertIn("'city_id': '0001'", output)
-            self.assertIn("'name': 'My_house'", output)
+            self.assertIn("'name': 'My house'", output)
             self.assertIn("'number_rooms': 4", output)
             self.assertIn("'latitude': 37.77", output)
             self.assertIn("'longitude': 43.434", output)
