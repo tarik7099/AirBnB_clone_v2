@@ -143,6 +143,30 @@ class TestHBNBCommand(unittest.TestCase):
             self.assertIn("'latitude': 37.77", output)
             self.assertIn("'longitude': 43.434", output)
 
+    def test_create_command_with_invalid_params(self):
+        """Test create command with invalid parameters."""
+        # Test create command with invalid parameters (missing quotes)
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd('create Place name=My_house')
+            output = f.getvalue().strip()
+            self.assertIn("** Unknown syntax: My_house **", output)
+
+    def test_create_command_with_invalid_class(self):
+        """Test create command with invalid class."""
+        # Test create command with invalid class name
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create InvalidClass")
+            output = f.getvalue().strip()
+            self.assertIn("** class doesn't exist **", output)
+
+    def test_create_command_with_invalid_type(self):
+        """Test create command with invalid data types."""
+        # Test create command with invalid data types
+        with patch("sys.stdout", new=StringIO()) as f:
+            self.HBNB.onecmd("create Place number_rooms=two")
+            output = f.getvalue().strip()
+            self.assertIn("** invalid syntax: two **", output)
+
 
 if __name__ == "__main__":
     unittest.main()
