@@ -147,40 +147,45 @@ class HBNBCommand(cmd.Cmd):
             print("** no instance found **")
     def do_create(self, args):
         """ Create an object of any class"""
-        if not args:
-            print("** class name missing **")
-            return
+        try:
+            if not args:
+                print("** class name missing **")
+                return
 
     # Split the arguments and extract class name and parameters
-        parts = args.split()
-        class_name = parts[0]
-        arguments = parts[1:]
+            parts = args.split()
+            class_name = parts[0]
+            arguments = parts[1:]
 
-        if class_name not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
+            if class_name not in HBNBCommand.classes:
+                print("** class doesn't exist **")
+                return
 
-        params = {}  # Dictionary to store parameters
+            params = {}  # Dictionary to store parameters
 
     # Parse the arguments to extract key-value pairs
-        for arg in arguments:
-            key, value = arg.split('=')
-            if value.startswith('"'):
-                value = value.strip('"').replace('_', ' ')
-            elif '.' in value:
-                value = float(value)
-            else:
-                try:
-                    value = int(value)
-                except ValueError:
-                    pass  # Handle other types of values if needed
-            params[key] = value
+            for arg in arguments:
+                key, value = arg.split('=')
+                if value.startswith('"'):
+                    value = value.strip('"').replace('_', ' ')
+                elif '.' in value:
+                    value = float(value)
+                else:
+                    try:
+                        value = eval(value)
+                    except (SyntaxError, NameError):
+
+                        continue  # Handle other types of values if needed
+                params[key] = value
     
     # Create the object instance and print its ID
-        obj = HBNBCommand.classes[class_name](**params)
-        storage.new(obj)
-        storage.save()
-        print(obj.id)
+            obj = HBNBCommand.classes[class_name](**params)
+            storage.new(obj)
+            print(obj.id)
+            storage.save()
+        except ValueError:
+            print(ValueError)
+            return
 
     def help_show(self):
         """ Help information for the show command """
