@@ -175,12 +175,12 @@ class HBNBCommand(cmd.Cmd):
                 except ValueError:
                     pass  # Handle other types of values if needed
             params[key] = value
-
-            obj = HBNBCommand.classes[class_name](**params)
-            storage.new(obj)
-            storage.save()
-            print(obj.id)
-        
+    
+    # Create the object instance and print its ID
+        obj = HBNBCommand.classes[class_name](**params)
+        storage.new(obj)
+        storage.save()
+        print(obj.id)
 
     def help_show(self):
         """ Help information for the show command """
