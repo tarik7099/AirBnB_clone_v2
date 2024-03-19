@@ -113,40 +113,6 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
-        """ Create an object of any class"""
-        if not args:
-            print("** class name missing **")
-            return
-        elif args.split()[0] not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-
-        text1 = args.split()
-        class_name = text1[0]
-        params = {}
-
-        for new in text1[2:]:
-            value_key = new.split('=')
-            key = value_key[0]
-            value = value_key[1]
-            if value.startswith('"'):
-                if '_' in value:
-                    value = value.strip('"').replace('_', ' ')
-            elif "." in value:
-                value = float(value)
-            else:
-                value = int(value)
-
-            params[key] = value
-
-        if class_name in HBNBCommand.classes:
-            new_instance = HBNBCommand.classes[class_name](**params)
-            storage.new(new_instance)
-            storage.save()
-            print(new_instance.id)  # Print the ID of the newly created object
-        else:
-            print("Invalid class name:", class_name)
     def help_create(self):
         """ Help information for the create method """
         print("Creates a class of any type")
@@ -179,7 +145,38 @@ class HBNBCommand(cmd.Cmd):
             print(storage._FileStorage__objects[key])
         except KeyError:
             print("** no instance found **")
+    def do_create(self, line):
+        """ Create a new instance of a class and print its id"""
+        try:
+            if not line:
+                raise SyntaxError()
+            parts = line.split(" ")
 
+            kwargs = {}
+            for part in parts[1:]:
+                key, value = tuple(part.split("="))
+                if value[0] == '"':
+                    value = value.strip('"').replace("_", " ")
+                else:
+                    try:
+                        value = eval(value)
+                    except (SyntaxError, NameError):
+                        continue
+                kwargs[key] = value
+
+            if not kwargs:
+                raise SyntaxError()
+
+            class_name = parts[0]
+            if class_name not in HBNBCommand.classes:
+                raise NameError()
+
+            obj = HBNBCommand.classes[class_name](**kwargs)
+            storage.new(obj)
+            storage.save()
+            print(obj.id)
+        except IndexError:
+            pass    
     def help_show(self):
         """ Help information for the show command """
         print("Shows an individual instance of a class")
