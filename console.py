@@ -168,8 +168,7 @@ class HBNBCommand(cmd.Cmd):
                 key, value = arg.split('=')
                 if value.startswith('"'):
                     value = value.strip('"').replace('_', ' ')
-                elif '.' in value:
-                    value = float(value)
+
                 else:
                     try:
                         value = eval(value)
