@@ -145,50 +145,55 @@ class HBNBCommand(cmd.Cmd):
             print(storage._FileStorage__objects[key])
         except KeyError:
             print("** no instance found **")
-    def do_create(self, args):
-        """ Create an object of any class"""
-        try:
-            if not args:
-                print("** class name missing **")
-                return
+    def do_create(self, arg):
+        """Create a new object."""
+        if not arg:
+            print("** class name missing **")
+            return
 
-    # Split the arguments and extract class name and parameters
-            parts = args.split()
-            class_name = parts[0]
-            arguments = parts[1:]
+        parts = arg.split()
+        class_name = parts[0]
 
-            if class_name not in HBNBCommand.classes:
-                print("** class doesn't exist **")
-                return
+        if class_name not in HBNBCommand.classes:
+            print("** class doesn't exist **")
+            return
 
-            params = {}  # Dictionary to store parameters
+        params = {}  # Dictionary to store parameters
 
     # Parse the arguments to extract key-value pairs
-            for arg in arguments:
-                key, value = arg.split('=')
-                if value.startswith('"'):
-                    value = value.strip('"').replace('_', ' ')
-                elif '.' in value:
-                    try:
-                        value = float(value)
-                    except (SyntaxError, NameError):
-                        continue
-                else:
+        for param in parts[1:]:
+            try:
+                key, value = param.split('=')
+            except ValueError:
+                print("** invalid syntax for parameter: '{}' **".format(param))
+                return
 
-                    try:
-                        value = int(value)
-                    except (SyntaxError, NameError):
-                        continue  # Handle other types of values if needed
-                params[key] = value
-    
+        # Process value based on data type
+            if value.startswith('"') and value.endswith('"'):
+                # String value
+                value = value[1:-1].replace('_', ' ')
+            elif '.' in value:
+            # Float value
+                try:
+                    value = float(value)
+                except ValueError:
+                    print("** invalid value for parameter '{}' **".format(key))
+                    return
+            else:
+            # Integer value
+                try:
+                    value = int(value)
+                except ValueError:
+                    print("** invalid value for parameter '{}' **".format(key))
+                    return
+
+            params[key] = value
+
     # Create the object instance and print its ID
-            obj = HBNBCommand.classes[class_name](**params)
-            storage.new(obj)
-            print(obj.id)
-            storage.save()
-        except ValueError:
-            print(ValueError)
-
+        obj = HBNBCommand.classes[class_name](**params)
+        storage.new(obj)
+        storage.save()
+        print(obj.id)
 
     def help_show(self):
         """ Help information for the show command """
