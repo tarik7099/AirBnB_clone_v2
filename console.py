@@ -178,7 +178,6 @@ class HBNBCommand(cmd.Cmd):
                     try:
                         value = int(value)
                     except (SyntaxError, NameError):
-
                         continue  # Handle other types of values if needed
                 params[key] = value
     
@@ -189,7 +188,7 @@ class HBNBCommand(cmd.Cmd):
             storage.save()
         except ValueError:
             print(ValueError)
-            re
+
 
     def help_show(self):
         """ Help information for the show command """
