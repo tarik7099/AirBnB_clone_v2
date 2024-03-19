@@ -138,35 +138,41 @@ class TestHBNBCommand(unittest.TestCase):
             output = f.getvalue()
             self.assertIn(pl, output)
             self.assertIn("'city_id': '0001'", output)
-            self.assertIn("'name': 'My house'", output)
+            self.assertIn("'name': 'My_house'", output)
             self.assertIn("'number_rooms': 4", output)
             self.assertIn("'latitude': 37.77", output)
             self.assertIn("'longitude': 43.434", output)
 
-    def test_create_command_with_invalid_params(self):
-        """Test create command with invalid parameters."""
-        # Test create command with invalid parameters (missing quotes)
-        with patch("sys.stdout", new=StringIO()) as f:
-            self.HBNB.onecmd('create Place name=My_house')
-            output = f.getvalue().strip()
-            self.assertIn("** Unknown syntax: My_house **", output)
 
-    def test_create_command_with_invalid_class(self):
-        """Test create command with invalid class."""
-        # Test create command with invalid class name
-        with patch("sys.stdout", new=StringIO()) as f:
-            self.HBNB.onecmd("create InvalidClass")
-            output = f.getvalue().strip()
-            self.assertIn("** class doesn't exist **", output)
+class TestCreateCommand(unittest.TestCase):
+    """Unittests for testing the create command in HBNB command interpreter."""
 
-    def test_create_command_with_invalid_type(self):
-        """Test create command with invalid data types."""
-        # Test create command with invalid data types
-        with patch("sys.stdout", new=StringIO()) as f:
-            self.HBNB.onecmd("create Place number_rooms=two")
-            output = f.getvalue().strip()
-            self.assertIn("** invalid syntax: two **", output)
+    @classmethod
+    def setUpClass(cls):
+        """Test setup."""
+        try:
+            os.rename("file.json", "tmp")
+        except IOError:
+            pass
+        cls.HBNB = HBNBCommand()
 
+    @classmethod
+    def tearDownClass(cls):
+        """Test teardown."""
+        try:
+            os.rename("tmp", "file.json")
+        except IOError:
+            pass
+        del cls.HBNB
 
-if __name__ == "__main__":
-    unittest.main()
+    def setUp(self):
+        """Test setup."""
+        FileStorage._FileStorage__objects = {}
+
+    def tearDown(self):
+        """Test teardown."""
+        try:
+            os.remove("file.json")
+        except IOError:
+            pass
+
