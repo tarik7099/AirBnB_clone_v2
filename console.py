@@ -145,38 +145,43 @@ class HBNBCommand(cmd.Cmd):
             print(storage._FileStorage__objects[key])
         except KeyError:
             print("** no instance found **")
-    def do_create(self, line):
-        """ Create a new instance of a class and print its id"""
-        try:
-            if not line:
-                raise SyntaxError()
-            parts = line.split(" ")
+    def do_create(self, args):
+        """ Create an object of any class"""
+        if not args:
+            print("** class name missing **")
+            return
 
-            kwargs = {}
-            for part in parts[1:]:
-                key, value = tuple(part.split("="))
-                if value[0] == '"':
-                    value = value.strip('"').replace("_", " ")
-                else:
-                    try:
-                        value = eval(value)
-                    except (SyntaxError, NameError):
-                        continue
-                kwargs[key] = value
+    # Split the arguments and extract class name and parameters
+        parts = args.split()
+        class_name = parts[0]
+        arguments = parts[1:]
 
-            if not kwargs:
-                raise SyntaxError()
+        if class_name not in HBNBCommand.classes:
+            print("** class doesn't exist **")
+            return
 
-            class_name = parts[0]
-            if class_name not in HBNBCommand.classes:
-                raise NameError()
+        params = {}  # Dictionary to store parameters
 
-            obj = HBNBCommand.classes[class_name](**kwargs)
+    # Parse the arguments to extract key-value pairs
+        for arg in arguments:
+            key, value = arg.split('=')
+            if value.startswith('"'):
+                value = value.strip('"').replace('_', ' ')
+            elif '.' in value:
+                value = float(value)
+            else:
+                try:
+                    value = int(value)
+                except ValueError:
+                    pass  # Handle other types of values if needed
+            params[key] = value
+
+            obj = HBNBCommand.classes[class_name](**params)
             storage.new(obj)
             storage.save()
             print(obj.id)
-        except IndexError:
-            pass    
+        
+
     def help_show(self):
         """ Help information for the show command """
         print("Shows an individual instance of a class")
