@@ -46,6 +46,26 @@ class TestCreateCommand(unittest.TestCase):
         output = mock_stdout.getvalue().strip()
         self.assertEqual(output, "** invalid syntax for parameter: 'name=test' **")
 
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_create_with_multiple_instances(self, mock_stdout):
+        # Create multiple instances of BaseModel with different parameters
+        self.console.onecmd('create BaseModel name="obj1" age=10')
+        self.console.onecmd('create BaseModel name="obj2" age=20')
+        self.console.onecmd('create BaseModel name="obj3" age=30')
+        self.assertEqual(len(storage.all()), 3)  # Verify three instances are created
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_create_with_float_param(self, mock_stdout):
+        self.console.onecmd('create BaseModel value=3.14')
+        obj = storage.all()['BaseModel']
+        self.assertEqual(obj.value, 3.14)  # Verify float parameter value
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_create_with_string_param(self, mock_stdout):
+        self.console.onecmd('create BaseModel text="hello world"')
+        obj = storage.all()['BaseModel']
+        self.assertEqual(obj.text, 'hello world')  # Verify string parameter value
+
 
 if __name__ == "__main__":
     unittest.main()
