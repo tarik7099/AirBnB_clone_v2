@@ -144,35 +144,5 @@ class TestHBNBCommand(unittest.TestCase):
             self.assertIn("'longitude': 43.434", output)
 
 
-class TestCreateCommand(unittest.TestCase):
-    """Unittests for testing the create command in HBNB command interpreter."""
-
-    @classmethod
-    def setUpClass(cls):
-        """Test setup."""
-        try:
-            os.rename("file.json", "tmp")
-        except IOError:
-            pass
-        cls.HBNB = HBNBCommand()
-
-    @classmethod
-    def tearDownClass(cls):
-        """Test teardown."""
-        try:
-            os.rename("tmp", "file.json")
-        except IOError:
-            pass
-        del cls.HBNB
-
-    def setUp(self):
-        """Test setup."""
-        FileStorage._FileStorage__objects = {}
-
-    def tearDown(self):
-        """Test teardown."""
-        try:
-            os.remove("file.json")
-        except IOError:
-            pass
-
+if __name__ == "__main__":
+    unittest.main()
