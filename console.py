@@ -10,6 +10,7 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+from datetime import datetime
 
 
 class HBNBCommand(cmd.Cmd):
@@ -147,50 +148,54 @@ class HBNBCommand(cmd.Cmd):
             print("** no instance found **")
     
     def do_create(self, arg):
-        """
-        Create a new instance of BaseModel and save it to the JSON file.
-        Usage: create <class_name>
-        """
-        try:
-            class_name = arg.split(" ")[0]
-            if len(class_name) == 0:
-                print("** class name missing **")
-                return
-            if class_name and class_name not in HBNBCommand.classes:
-                print("** class doesn't exist **")
-                return
-
-            kwargs = {}
-            commands = arg.split(" ")
-            for i in range(1, len(commands)):
-                
-                key = commands[i].split("=")[0]
-                value = commands[i].split("=")[1]
-                if value.startswith('"'):
-                    value = value.strip('"').replace("_", " ")
-                else:
-                    try:
-                        value = eval(value)
-                    except (SyntaxError, NameError):
-                        continue
-                kwargs[key] = value
-
-            if kwargs == {}:
-                new_instance = eval(class_name)()
-            else:
-                new_instance = eval(class_name)(**kwargs)
-            storage.new(new_instance)
-            print(new_instance.id)
-            storage.save()
-        except ValueError:
-            print(ValueError)
+        """Create a new object."""
+        if not arg:
+            print("** class name missing **")
             return
 
-        except SyntaxError:
-            print("** class name missing **")
-        except NameError:
-            print("** class doesn't exist **")
+        parts = arg.split()
+        class_name = parts[0]
 
+        if class_name not in HBNBCommand.classes:
+            print("** class doesn't exist **")
+            return
+
+        params = {}  # Dictionary to store parameters
+
+    # Parse the arguments to extract key-value pairs
+        for param in parts[1:]:
+            try:
+                key, value = param.split('=')
+            except ValueError:
+                print("** invalid syntax for parameter: '{}' **".format(param))
+                return
+
+        # Process value based on data type
+            if value.startswith('"') and value.endswith('"'):
+                # String value
+                value = value[1:-1].replace('_', ' ')
+            elif '.' in value:
+            # Float value
+                try:
+                    value = float(value)
+                except ValueError:
+                    print("** invalid value for parameter '{}' **".format(key))
+                    return
+            else:
+            # Integer value
+                try:
+                    value = int(value)
+                except ValueError:
+                    print("** invalid value for parameter '{}' **".format(key))
+                    return
+
+            params[key] = value
+
+    # Create the object instance and print its ID
+        obj = HBNBCommand.classes[class_name](**params)
+        storage.new(obj)
+        storage.save()
+        print(obj.id)
 
     def help_show(self):
         """ Help information for the show command """
