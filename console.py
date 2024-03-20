@@ -113,52 +113,46 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
     
-    @classmethod
-    def parseArguments(self, args):
-        """ Converts a list of key_value into a valid kwargs"""
-        dictionary = {}
-        for arg in args:
-            key, value = arg.split("=")
-            if value[0] == '"':
-                value = value.strip('"')
-                value = value.replace('"', '\"')
-                value = value.replace('_', ' ')
-            elif '.' in value:
-                value = float(value)
-            elif ',' in value:
-                continue
+       def do_create(self, arg):
+        """
+        Create a new instance of BaseModel and save it to the JSON file.
+        Usage: create <class_name>
+        """
+        try:
+            class_name = arg.split(" ")[0]
+            if len(class_name) == 0:
+                print("** class name missing **")
+                return
+            if class_name and class_name not in self.valid_classes:
+                print("** class doesn't exist **")
+                return
+
+            kwargs = {}
+            commands = arg.split(" ")
+            for i in range(1, len(commands)):
+                
+                key = commands[i].split("=")[0]
+                value = commands[i].split("=")[1]
+                #key, value = tuple(commands[i].split("="))
+                if value.startswith('"'):
+                    value = value.strip('"').replace("_", " ")
+                else:
+                    try:
+                        value = eval(value)
+                    except (SyntaxError, NameError):
+                        continue
+                kwargs[key] = value
+
+            if kwargs == {}:
+                new_instance = eval(class_name)()
             else:
-                value = int(value)
-
-            dictionary[key] = value
-
-  
-        return dictionary
-
-    def do_create(self, args):
-        """ Create an object of any class"""
-
-        if not args:
-            print("** class name missing **")
+                new_instance = eval(class_name)(**kwargs)
+            storage.new(new_instance)
+            print(new_instance.id)
+            storage.save()
+        except ValueError:
+            print(ValueError)
             return
-
-        args = args.split(" ")
-        class_name = args[0]
-        if class_name not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-
-        
-        new_instance = HBNBCommand.classes[class_name]()
-        class_attributes = HBNBCommand.parseArguments(args[1:])
-        if class_attributes:
-            for attr, v in class_attributes.items():
-                setattr(new_instance, attr, v)
-
-        storage.save()
-        print(new_instance.id)
-        new_instance.save()
-
 
     def help_create(self):
         """ Help information for the create method """
