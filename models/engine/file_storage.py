@@ -13,12 +13,10 @@ class FileStorage:
         """
         if cls is None:
             return self.__objects
-        elif type(cls) is str:
-            return {k: v for k, v in self.__objects.items()
-                    if v.__class__ == cls}
-        return {k: v for k, v in self.__objects.items()
-                    if v.__class__ == cls}
-    
+        elif isinstance(cls, str):
+            return {k: v for k, v in self.__objects.items() if v.__class__.__name__ == cls}
+        else:
+            return {k: v for k, v in self.__objects.items() if isinstance(v, cls)}    
     def delete(self, obj=None):
         """
         delete obj from __objects if it’s inside - if obj is equal to None,
