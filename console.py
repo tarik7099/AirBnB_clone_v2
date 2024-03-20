@@ -16,7 +16,6 @@ from models.state import State
 from models.city import City
 
 
-
 class HBNBCommand(cmd.Cmd):
     """
     HBNBCommand console class
@@ -42,12 +41,10 @@ class HBNBCommand(cmd.Cmd):
         Quit command to exit the program.
         """
         return True
-        
 
     def do_create(self, arg):
         """
         Create a new instance of BaseModel and save it to the JSON file.
-        Usage: create <class_name>
         """
         try:
             class_name = arg.split(" ")[0]
@@ -88,7 +85,6 @@ class HBNBCommand(cmd.Cmd):
     def do_show(self, arg):
         """
         Show the string representation of an instance.
-        Usage: show <class_name> <id>
         """
         commands = shlex.split(arg)
 
@@ -110,7 +106,6 @@ class HBNBCommand(cmd.Cmd):
     def do_destroy(self, arg):
         """
         Delete an instance based on the class name and id.
-        Usage: destroy <class_name> <id>
         """
         commands = shlex.split(arg)
 
@@ -132,8 +127,6 @@ class HBNBCommand(cmd.Cmd):
     def do_all(self, arg):
         """
         Print the string representation of all instances or a specific class.
-        Usage: <User>.all()
-                <User>.show()
         """
         objects = storage.all()
 
@@ -152,7 +145,6 @@ class HBNBCommand(cmd.Cmd):
     def do_count(self, arg):
         """
         Counts and retrieves the number of instances of a class
-        usage: <class name>.count()
         """
         objects = storage.all()
 
@@ -176,7 +168,6 @@ class HBNBCommand(cmd.Cmd):
     def do_update(self, arg):
         """
         Update an instance by adding or updating an attribute.
-        Usage: update <class_name> <id> <attribute_name> "<attribute_value>"
         """
         commands = shlex.split(arg)
 
