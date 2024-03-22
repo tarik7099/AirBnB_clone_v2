@@ -11,12 +11,12 @@ class State(BaseModel, Base):
     """State class"""
 
     if getenv("HBNB_TYPE_STORAGE") == "db":
-        _tblname_ = "states"
+        _tablename_ = "states"
 
-        name_ot = Column(String(128), nullable=False)
-        cities_ot = relationship('City', backref='state', cascade='all, delete')
+        name = Column(String(128), nullable=False)
+        cities = relationship('City', backref='state', cascade='all, delete')
     else:
-        name_ot = ""
+        name = ""
 
     if getenv("HBNB_TYPE_STORAGE") != "db":
         @property
@@ -24,8 +24,8 @@ class State(BaseModel, Base):
             """
            Getter attribute for cities
             """
-            city_list_ot = []
-            for city_ot in list(models.storage.all("City").values()):
-                if city_ot.state_id == self.id:
-                    city_list_ot.append(city_ot)
-            return city_list_ot
+            city_list_ = []
+            for city in list(models.storage.all("City").values()):
+                if city.state_id == self.id:
+                    city_list.append(city)
+            return city_list_
