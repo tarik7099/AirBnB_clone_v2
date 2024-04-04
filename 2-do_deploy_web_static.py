@@ -1,47 +1,56 @@
 #!/usr/bin/python3
-#!/usr/bin/python3
+"""Compress web static package
 """
-Fabric script based on the file 1-pack_web_static.py that distributes
-an archive to your web servers
-"""
-""" a Fabric script (based on the file 1-pack_web_static.py) that distributes..
-     """
-
-from fabric.api import env, put, run
-from os.path import exists
-from fabric.contrib.files import exists
+from fabric.api import *
+from datetime import datetime
+from os import path
 
 env.hosts = ['100.26.241.34', '54.90.13.18']
 
+env.user = 'ubuntu'
+env.key_filename = '~/.ssh/id_rsa'
+
+
 def do_deploy(archive_path):
-    """Distributes an archive to the web servers"""
-    """ distributes an archive to my web servers """
-    if not exists(archive_path):
-        return False
-    filename11 = archive_path.split('/')[-1]
-    no_tgz = "/data/web_static/releases/{}".format(filename11.split('.')[0])
-    tmep = "/tmp/" + filename11
+        """Deploy web files to server
+        """
+        try:
+                if not (path.exists(archive_path)):
+                        return False
 
-    try:
-        file_name = archive_path.split('/')[-1]
-        file_no_ext = file_name.split('.')[0]
-        dest_folder = '/data/web_static/releases/{}'.format(file_no_ext)
-        put(archive_path, '/tmp/')
-        run('mkdir -p {}'.format(dest_folder))
-        run('tar -xzf /tmp/{} -C {}'.format(file_name, dest_folder))
-        run('rm /tmp/{}'.format(file_name))
-        run('mv {}/web_static/* {}'.format(dest_folder, dest_folder))
-        run('rm -rf {}/web_static'.format(dest_folder))
-        run('rm -rf /data/web_static/current')
-        run('ln -s {} /data/web_static/current'.format(dest_folder))
-        put(archive_path, temp)
-        run("mkdir -p {}".format(no_tgz))
-        run("tar -xzf {} -C {}".format(temp, no_tgz))
-        run("mv {}/web_static/* {}".format(no_tgz, no_tgz))
-        run("rm -rf {}/web_static".format(no_tgz))
-        run("rm -rf /data/web_static/current")
-        run("ln -s {}/ /data/web_static/current".format(no_tgz))
+                # upload archive
+                put(archive_path, '/tmp/')
+
+                # create target dir
+                timestamp = archive_path[-18:-4]
+                run('sudo mkdir -p /data/web_static/\
+releases/web_static_{}/'.format(timestamp))
+
+                # uncompress archive and delete .tgz
+                run('sudo tar -xzf /tmp/web_static_{}.tgz -C \
+/data/web_static/releases/web_static_{}/'
+                    .format(timestamp, timestamp))
+
+                # remove archive
+                run('sudo rm /tmp/web_static_{}.tgz'.format(timestamp))
+
+                # move contents into host web_static
+                run('sudo mv /data/web_static/releases/web_static_{}/web_static/* \
+/data/web_static/releases/web_static_{}/'.format(timestamp, timestamp))
+
+                # remove extraneous web_static dir
+                run('sudo rm -rf /data/web_static/releases/\
+web_static_{}/web_static'
+                    .format(timestamp))
+
+                # delete pre-existing sym link
+                run('sudo rm -rf /data/web_static/current')
+
+                # re-establish symbolic link
+                run('sudo ln -s /data/web_static/releases/\
+web_static_{}/ /data/web_static/current'.format(timestamp))
+        except:
+                return False
+
+        # return True on success
         return True
-    except:
-        return False
-
