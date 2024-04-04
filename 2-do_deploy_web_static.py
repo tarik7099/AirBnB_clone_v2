@@ -19,21 +19,20 @@ def do_deploy(archive_path):
         return False
     try:
         archive = archive_path.split("/")[-1]
-        path = "/data/web_static/releases"
+        pat = "/data/web_static/releases"
         put("{}".format(archive_path), "/tmp/{}".format(archive))
         folder = archive.split(".")
-        run("mkdir -p {}/{}/".format(path, folder[0]))
+        run("mkdir -p {}/{}/".format(pat, folder[0]))
         new_archive = '.'.join(folder)
         run("tar -xzf /tmp/{} -C {}/{}/"
-            .format(new_archive, path, folder[0]))
+            .format(new_archive, pat, folder[0]))
         run("rm /tmp/{}".format(archive))
         run("mv {}/{}/web_static/* {}/{}/"
-            .format(path, folder[0], path, folder[0]))
-        run("rm -rf {}/{}/web_static".format(path, folder[0]))
+            .format(pat, folder[0], pat, folder[0]))
+        run("rm -rf {}/{}/web_static".format(pat, folder[0]))
         run("rm -rf /data/web_static/current")
         run("ln -sf {}/{} /data/web_static/current"
-            .format(path, folder[0]))
+            .format(pat, folder[0]))
         return True
-    except:
+    except Exception:
         return False
-
