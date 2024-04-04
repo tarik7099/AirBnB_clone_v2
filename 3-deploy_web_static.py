@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """ This module contains the function do_pack that generates a .tgz archive
   from the contents of the web_static folder (fabric script) """
+from os.path import exists
 
 from fabric.api import *
 from datetime import datetime
@@ -18,44 +19,47 @@ def do_pack():
     else:
         return None
 
-#!/usr/bin/python3
-"""
-Fabric script that distributes an archive to your web servers using the function do_deploy.
-"""
-
-from fabric.api import *
-from os.path import exists
-
-env.hosts = ['3.85.1.131', '54.90.13.18']  # Replace with your web server IPs
+env.hosts = ['100.26.241.34', '54.90.13.18']  # Replace with your web server IPs
 
 def do_deploy(archive_path):
-    """Distributes an archive to the web servers"""
-    if not exists(archive_path):
-        return False
-
+    """Distribute an archive to the web servers"""
     try:
-        # Upload the archive to the /tmp/ directory of the web server
+        if not exists(archive_path):
+            print("Error: Archive file does not exist.")
+            return False
+        
+        file_name = archive_path.split("/")[-1]
+        no_ext = file_name.split(".")[0]
+        remote_dir = "/data/web_static/releases/"
+
+        # Upload archive
         put(archive_path, '/tmp/')
 
-        # Uncompress the archive to the folder /data/web_static/releases/<archive filename without extension>
-        file_name = archive_path.split('/')[-1]
-        file_prefix = file_name.split('.')[0]
-        target_path = '/data/web_static/releases/{}/'.format(file_prefix)
-        run('mkdir -p {}'.format(target_path))
-        run('tar -xzf /tmp/{} -C {}'.format(file_name, target_path))
+        # Create release directory
+        run('mkdir -p {}{}'.format(remote_dir, no_ext))
 
-        # Delete the archive from the web server
+        # Extract archive
+        with run('tar -xzf /tmp/{} -C {}{}'.format(file_name, remote_dir, no_ext)) as result:
+            if result.failed:
+                print("Error extracting archive:", result)
+                return False
+
+        # Remove archive
         run('rm /tmp/{}'.format(file_name))
 
-        # Delete the symbolic link /data/web_static/current from the web server
+        # Move files and create symlink
+        run('mv {0}{1}/web_static/* {0}{1}/'.format(remote_dir, no_ext))
+        run('rm -rf {}{}/web_static'.format(remote_dir, no_ext))
         run('rm -rf /data/web_static/current')
+        run('ln -s {}{}/ /data/web_static/current'.format(remote_dir, no_ext))
 
-        # Create a new symbolic link /data/web_static/current linked to the new version
-        run('ln -s {} /data/web_static/current'.format(target_path))
-
+        print("Deployment successful.")
         return True
+    except CommandException as e:
+        print("Command execution failed:", e)
+        return False
     except Exception as e:
-        print(e)
+        print("An error occurred:", e)
         return False
 
 def deploy():
