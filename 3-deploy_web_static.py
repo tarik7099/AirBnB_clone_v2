@@ -22,7 +22,7 @@ def do_pack():
         local("tar --create --verbose -z --file={} ./web_static"
               .format(file_nm))
         return file_name
-    except:
+    except Exception:
         return None
 
 
