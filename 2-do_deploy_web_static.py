@@ -1,45 +1,47 @@
 #!/usr/bin/python3
+#!/usr/bin/python3
 """
-Fabric script that distributes an archive to your web servers using the function do_deploy.
+Fabric script based on the file 1-pack_web_static.py that distributes
+an archive to your web servers
 """
+""" a Fabric script (based on the file 1-pack_web_static.py) that distributes..
+     """
 
-from fabric.api import *
+from fabric.api import env, put, run
 from os.path import exists
-env.hosts = ['100.26.241.34', '54.90.13.18']
+from fabric.contrib.files import exists
 
-env.user = 'ubuntu'  # Replace with your username
+env.hosts = ['100.26.241.34', '54.90.13.18']
 
 def do_deploy(archive_path):
     """Distributes an archive to the web servers"""
+    """ distributes an archive to my web servers """
     if not exists(archive_path):
         return False
+    filename11 = archive_path.split('/')[-1]
+    no_tgz = "/data/web_static/releases/{}".format(filename11.split('.')[0])
+    tmep = "/tmp/" + filename11
 
     try:
-        # Upload the archive to the /tmp/ directory of the web server
-        put(archive_path, '/tmp/')
-
-        # Uncompress the archive to the folder /data/web_static/releases/<archive filename without extension>
         file_name = archive_path.split('/')[-1]
-        file_prefix = file_name.split('.')[0]
-        target_path = '/data/web_static/releases/{}/'.format(file_prefix)
-
-        # Remove existing files in the target directory
-        run('sudo rm -rf {}'.format(target_path))
-
-        # Extract the new archive
-        run('sudo mkdir -p {}'.format(target_path))
-        run('sudo tar -xzf /tmp/{} -C {}'.format(file_name, target_path))
-
-        # Delete the archive from the web server
-        run('sudo rm /tmp/{}'.format(file_name))
-
-        # Delete the symbolic link /data/web_static/current from the web server
-        run('sudo rm -rf /data/web_static/current')
-
-        # Create a new symbolic link /data/web_static/current linked to the new version
-        run('sudo ln -s {} /data/web_static/current'.format(target_path))
-
+        file_no_ext = file_name.split('.')[0]
+        dest_folder = '/data/web_static/releases/{}'.format(file_no_ext)
+        put(archive_path, '/tmp/')
+        run('mkdir -p {}'.format(dest_folder))
+        run('tar -xzf /tmp/{} -C {}'.format(file_name, dest_folder))
+        run('rm /tmp/{}'.format(file_name))
+        run('mv {}/web_static/* {}'.format(dest_folder, dest_folder))
+        run('rm -rf {}/web_static'.format(dest_folder))
+        run('rm -rf /data/web_static/current')
+        run('ln -s {} /data/web_static/current'.format(dest_folder))
+        put(archive_path, temp)
+        run("mkdir -p {}".format(no_tgz))
+        run("tar -xzf {} -C {}".format(temp, no_tgz))
+        run("mv {}/web_static/* {}".format(no_tgz, no_tgz))
+        run("rm -rf {}/web_static".format(no_tgz))
+        run("rm -rf /data/web_static/current")
+        run("ln -s {}/ /data/web_static/current".format(no_tgz))
         return True
-    except Exception as e:
-        print(e)
-        return False 
+    except:
+        return False
+
