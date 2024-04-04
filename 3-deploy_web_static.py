@@ -2,6 +2,8 @@
 """
     Fabric script that creates and distributes an archive
 """
+from fabric.contrib.files import exists  # Import exists function
+
 from fabric.api import *
 from fabric.operations import run, put, sudo, local
 from datetime import datetime
@@ -52,14 +54,11 @@ def do_deploy(archive_path):
     except Exception:
         return False
 
-
 def deploy():
+    """ creates and distributes an archive to your web servers
     """
-        deploy function that creates/distributes
-    """
-    global created_path
-    if created_path is None:
-        created_path = do_pack()
-    if created_path is None:
+    new_archive_path = do_pack()
+    if exists(new_archive_path) is False:
         return False
-    return do_deploy(created_path)
+    result = do_deploy(new_archive_path)
+    return result
