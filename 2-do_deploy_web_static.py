@@ -6,7 +6,8 @@ Fabric script that distributes an archive to your web servers using the function
 from fabric.api import *
 from os.path import exists
 
-env.hosts = ['52.87.222.204', '100.25.194.62']  # Replace with your web server IPs
+env.hosts = ['100.26.241.34', '54.90.13.18']  # Replace with your web server IPs
+env.user = 'ubuntu'  # Replace with your username
 
 def do_deploy(archive_path):
     """Distributes an archive to the web servers"""
@@ -21,20 +22,24 @@ def do_deploy(archive_path):
         file_name = archive_path.split('/')[-1]
         file_prefix = file_name.split('.')[0]
         target_path = '/data/web_static/releases/{}/'.format(file_prefix)
-        run('mkdir -p {}'.format(target_path))
-        run('tar -xzf /tmp/{} -C {}'.format(file_name, target_path))
+
+        # Remove existing files in the target directory
+        run('sudo rm -rf {}'.format(target_path))
+
+        # Extract the new archive
+        run('sudo mkdir -p {}'.format(target_path))
+        run('sudo tar -xzf /tmp/{} -C {}'.format(file_name, target_path))
 
         # Delete the archive from the web server
-        run('rm /tmp/{}'.format(file_name))
+        run('sudo rm /tmp/{}'.format(file_name))
 
         # Delete the symbolic link /data/web_static/current from the web server
-        run('rm -rf /data/web_static/current')
+        run('sudo rm -rf /data/web_static/current')
 
         # Create a new symbolic link /data/web_static/current linked to the new version
-        run('ln -s {} /data/web_static/current'.format(target_path))
+        run('sudo ln -s {} /data/web_static/current'.format(target_path))
 
         return True
     except Exception as e:
         print(e)
-        return False
-
+        return False 
