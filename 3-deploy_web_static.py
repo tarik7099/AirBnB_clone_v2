@@ -54,8 +54,10 @@ def do_deploy(archive_path):
     except Exception:
         return False
 
+
 def deploy():
-    """ creates and distributes an archive to your web servers
+    """
+    creates and distributes an archive to your web servers
     """
     new_archive_path = do_pack()
     if exists(new_archive_path) is False:
