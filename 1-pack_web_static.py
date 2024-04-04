@@ -13,9 +13,9 @@ def do_pack():
     """
     local("sudo mkdir -p versions")
     date = datetime.now().strftime("%Y%m%d%H%M%S")
-    file = f"versions/web_static_{date}.tgz"
-    res = local(f"sudo tar -cvzf {file} web_static")
-    if result.succeeded:
-        return filename
+    filen = f"versions/web_static_{date}.tgz"
+    res = local(f"sudo tar -cvzf {filen} web_static")
+    if res.succeeded:
+        return filen
     else:
         return None
