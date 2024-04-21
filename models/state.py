@@ -17,6 +17,16 @@ class State(BaseModel, Base):
         cities = relationship('City', backref='state', cascade='all, delete')
     else:
         name = ""
+    if storage_type != 'db':
+        @property
+        def cities(self):
+            """Return the list of City objects from storage linked"""
+            from models.city import City
+            cities_list = []
+            for city in storage.all(City).values():
+                if city.state_id == self.id:
+                    cities_list.append(city)
+            return cities_list
 
     if getenv("HBNB_TYPE_STORAGE") != "db":
         @property
